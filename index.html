@@ -1,0 +1,1615 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Viaje · SEO Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✍️</text></svg>">
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f9f9f7;
+        color: #1a1a18;
+        padding: 2rem 1.5rem;
+        font-size: 15px;
+      }
+      .dash {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .header {
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .header-left h1 {
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .header-left p {
+        font-size: 13px;
+        color: #6b6b67;
+        margin-top: 3px;
+      }
+      .save-status {
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 10px;
+        border: 0.5px solid #d4d4cc;
+        color: #6b6b67;
+        white-space: nowrap;
+        align-self: flex-start;
+        margin-top: 4px;
+      }
+      .save-status.saved {
+        color: #085041;
+        background: #e1f5ee;
+        border-color: #5dcaa5;
+      }
+      .save-status.saving {
+        color: #633806;
+        background: #faeeda;
+        border-color: #ef9f27;
+      }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+      .tab {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 0.5px solid #ccc;
+        background: transparent;
+        font-size: 13px;
+        cursor: pointer;
+        color: #6b6b67;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .tab.active {
+        background: #1a1a18;
+        color: #fff;
+        border-color: #1a1a18;
+      }
+      .tab:hover:not(.active) {
+        background: #f0f0ec;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        align-items: center;
+      }
+      .filters select,
+      .filters input {
+        font-size: 13px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 0.5px solid #ccc;
+        background: #fff;
+        color: #1a1a18;
+        font-family: inherit;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 500;
+      }
+      .badge.h1 {
+        background: #e6f1fb;
+        color: #0c447c;
+      }
+      .badge.h2 {
+        background: #e1f5ee;
+        color: #085041;
+      }
+      .badge.h3 {
+        background: #faeeda;
+        color: #633806;
+      }
+      .badge.cta {
+        background: #eeedfe;
+        color: #3c3489;
+      }
+      .kw-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+      }
+      .kw-table th {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 0.5px solid #e8e8e4;
+        color: #6b6b67;
+        font-weight: 500;
+        font-size: 12px;
+      }
+      .kw-table td {
+        padding: 8px 10px;
+        border-bottom: 0.5px solid #e8e8e4;
+        color: #1a1a18;
+        vertical-align: top;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .kw-table tr:last-child td {
+        border-bottom: none;
+      }
+      .kw-table tr:hover td {
+        background: #f5f5f1;
+      }
+      .kw-table .col-del {
+        width: 32px;
+        text-align: center;
+      }
+      .card {
+        background: #fff;
+        border: 0.5px solid #e8e8e4;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      .copy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap: 12px;
+      }
+      .copy-card {
+        background: #fff;
+        border: 0.5px solid #e8e8e4;
+        border-radius: 12px;
+        padding: 14px;
+        position: relative;
+      }
+      .copy-card .copy-id {
+        font-size: 11px;
+        color: #9b9b96;
+        font-family: monospace;
+        margin-bottom: 6px;
+      }
+      .copy-card .copy-meta {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .copy-card .copy-text {
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 8px;
+        background: #f5f5f1;
+        padding: 8px 10px;
+        border-radius: 8px;
+      }
+      .copy-card .copy-label {
+        font-size: 11px;
+        color: #9b9b96;
+        margin-bottom: 4px;
+      }
+      .copy-card .copy-vos {
+        font-size: 12px;
+        color: #6b6b67;
+        line-height: 1.4;
+      }
+      .copy-card .copy-notes {
+        font-size: 11px;
+        color: #6b6b67;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 0.5px solid #e8e8e4;
+      }
+      .pill {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        border: 0.5px solid #e8e8e4;
+        color: #6b6b67;
+      }
+      .add-section {
+        background: #f5f5f1;
+        border: 0.5px solid #e8e8e4;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1.5rem;
+      }
+      .add-section h3 {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 1rem;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .form-field label {
+        font-size: 12px;
+        color: #6b6b67;
+      }
+      .form-field input,
+      .form-field select,
+      .form-field textarea {
+        font-size: 13px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 0.5px solid #ccc;
+        background: #fff;
+        color: #1a1a18;
+        font-family: inherit;
+      }
+      .form-field.full {
+        grid-column: 1/-1;
+      }
+      .form-field textarea {
+        resize: vertical;
+        min-height: 66px;
+      }
+      .btn-add {
+        margin-top: 12px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: 0.5px solid #ccc;
+        background: #1a1a18;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-add:hover {
+        opacity: 0.85;
+      }
+      .btn-del {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9b9b96;
+        font-size: 14px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        line-height: 1;
+      }
+      .btn-del:hover {
+        color: #a32d2d;
+        background: #fcebeb;
+      }
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        margin-bottom: 1.5rem;
+      }
+      .stat-card {
+        background: #f5f5f1;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .stat-card .sv {
+        font-size: 22px;
+        font-weight: 500;
+      }
+      .stat-card .sk {
+        font-size: 11px;
+        color: #6b6b67;
+        margin-top: 2px;
+      }
+      .empty {
+        text-align: center;
+        padding: 2rem;
+        color: #6b6b67;
+        font-size: 14px;
+      }
+      .count-badge {
+        font-size: 11px;
+        background: #f5f5f1;
+        border-radius: 10px;
+        padding: 1px 7px;
+        color: #6b6b67;
+        margin-left: 4px;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 11px;
+        padding: 2px 7px;
+        border-radius: 10px;
+        background: #eeedfe;
+        color: #3c3489;
+        margin-right: 4px;
+      }
+      .smi-card {
+        background: #fff;
+        border: 0.5px solid #e8e8e4;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 10px;
+      }
+      .del-card {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dash">
+      <div class="header">
+        <div class="header-left">
+          <h1>Mi Viaje · SEO Dashboard</h1>
+          <p>Keywords, copys y estructura · BAC Credomatic</p>
+        </div>
+        <span class="save-status" id="save-status">Cargando...</span>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('kw', this)">
+          Keywords <span class="count-badge" id="kw-count">0</span>
+        </button>
+        <button class="tab" onclick="showTab('copys', this)">
+          Banco de copys <span class="count-badge" id="copy-count">0</span>
+        </button>
+        <button class="tab" onclick="showTab('struct', this)">
+          Estructura
+        </button>
+        <button class="tab" onclick="showTab('smi', this)">
+          Sobre mi viaje
+        </button>
+      </div>
+
+      <div id="sec-kw" class="section active">
+        <div class="stats-row" id="kw-stats"></div>
+        <div class="filters">
+          <select id="kw-pais" onchange="renderKW()">
+            <option value="">Todos los países</option>
+            <option value="CR">Costa Rica</option>
+            <option value="HN">Honduras</option>
+            <option value="GT">Guatemala</option>
+            <option value="NI">Nicaragua</option>
+            <option value="SV">El Salvador</option>
+            <option value="PA">Panamá</option>
+          </select>
+          <select id="kw-producto" onchange="renderKW()">
+            <option value="">Todos los productos</option>
+            <option>Vuelos</option>
+            <option>Hoteles</option>
+            <option>Autos</option>
+            <option>Paquetes</option>
+            <option>Seguro</option>
+            <option>Financiamiento</option>
+          </select>
+          <select id="kw-jerarquia" onchange="renderKW()">
+            <option value="">Todas las jerarquías</option>
+            <option>H1</option>
+            <option>H2</option>
+            <option>H3</option>
+          </select>
+          <select id="kw-tipo" onchange="renderKW()">
+            <option value="">Todos los tipos</option>
+            <option value="info">Informacional</option>
+            <option value="trans">Transaccional</option>
+          </select>
+          <input
+            type="text"
+            id="kw-search"
+            placeholder="Buscar keyword..."
+            oninput="renderKW()"
+            style="flex: 1; min-width: 150px"
+          />
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="kw-table">
+              <thead>
+                <tr>
+                  <th style="width: 100px">País</th>
+                  <th>Keyword</th>
+                  <th style="width: 140px">Intención</th>
+                  <th style="width: 100px">Tipo</th>
+                  <th style="width: 90px">Producto</th>
+                  <th style="width: 50px">Nivel</th>
+                  <th class="col-del"></th>
+                </tr>
+              </thead>
+              <tbody id="kw-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="add-section">
+          <h3>Agregar keyword</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>País</label
+              ><select id="new-kw-pais">
+                <option value="CR">Costa Rica</option>
+                <option value="HN">Honduras</option>
+                <option value="GT">Guatemala</option>
+                <option value="NI">Nicaragua</option>
+                <option value="SV">El Salvador</option>
+                <option value="PA">Panamá</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Producto</label
+              ><select id="new-kw-prod">
+                <option>Vuelos</option>
+                <option>Hoteles</option>
+                <option>Autos</option>
+                <option>Paquetes</option>
+                <option>Seguro</option>
+                <option>Financiamiento</option>
+              </select>
+            </div>
+            <div class="form-field full">
+              <label>Keyword</label
+              ><input
+                type="text"
+                id="new-kw-text"
+                placeholder="ej. reservar vuelos baratos desde Honduras"
+              />
+            </div>
+            <div class="form-field">
+              <label>Intención principal</label
+              ><input
+                type="text"
+                id="new-kw-int"
+                placeholder="ej. Reserva de vuelos"
+              />
+            </div>
+            <div class="form-field">
+              <label>Tipo</label
+              ><select id="new-kw-tipo">
+                <option value="info">Informacional</option>
+                <option value="trans">Transaccional</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Jerarquía</label
+              ><select id="new-kw-jer">
+                <option>H1</option>
+                <option>H2</option>
+                <option>H3</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-add" onclick="addKW()">Agregar keyword</button>
+        </div>
+      </div>
+
+      <div id="sec-copys" class="section">
+        <div class="filters">
+          <select id="cp-plantilla" onchange="renderCopys()">
+            <option value="">Todas las plantillas</option>
+            <option>Inicio</option>
+            <option>Sobre Mi Viaje</option>
+            <option>Promociones</option>
+            <option>Tutoriales</option>
+            <option>Experiencias Exclusivas</option>
+          </select>
+          <select id="cp-elemento" onchange="renderCopys()">
+            <option value="">Todos los elementos</option>
+            <option>H1</option>
+            <option>H2</option>
+            <option>H3</option>
+            <option>CTA</option>
+            <option>Texto apoyo</option>
+            <option>Microcopy</option>
+          </select>
+          <input
+            type="text"
+            id="cp-search"
+            placeholder="Buscar copy..."
+            oninput="renderCopys()"
+            style="flex: 1; min-width: 150px"
+          />
+        </div>
+        <div id="copy-grid" class="copy-grid"></div>
+        <div class="add-section">
+          <h3>Agregar copy</h3>
+          <div class="form-grid">
+            <div class="form-field">
+              <label>ID</label
+              ><input type="text" id="new-cp-id" placeholder="ej. HOME-H1-04" />
+            </div>
+            <div class="form-field">
+              <label>Plantilla</label
+              ><select id="new-cp-plantilla">
+                <option>Inicio</option>
+                <option>Sobre Mi Viaje</option>
+                <option>Promociones</option>
+                <option>Tutoriales</option>
+                <option>Experiencias Exclusivas</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Elemento</label
+              ><select id="new-cp-elemento">
+                <option>H1</option>
+                <option>H2</option>
+                <option>H3</option>
+                <option>CTA</option>
+                <option>Texto apoyo</option>
+                <option>Microcopy</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Bloque</label
+              ><input type="text" id="new-cp-bloque" placeholder="ej. Hero" />
+            </div>
+            <div class="form-field full">
+              <label>Texto base (neutral)</label
+              ><textarea
+                id="new-cp-texto"
+                placeholder="Texto principal del copy..."
+              ></textarea>
+            </div>
+            <div class="form-field full">
+              <label>Versión "tú"</label
+              ><textarea
+                id="new-cp-tu"
+                placeholder="Versión tuteo..."
+              ></textarea>
+            </div>
+            <div class="form-field full">
+              <label>Versión "vos"</label
+              ><textarea
+                id="new-cp-vos"
+                placeholder="Versión voseo..."
+              ></textarea>
+            </div>
+            <div class="form-field full">
+              <label>Notas de uso</label
+              ><input
+                type="text"
+                id="new-cp-notas"
+                placeholder="ej. CTA principal recomendado."
+              />
+            </div>
+          </div>
+          <button class="btn-add" onclick="addCopy()">Agregar copy</button>
+        </div>
+      </div>
+
+      <div id="sec-struct" class="section"><div id="struct-cards"></div></div>
+
+      <div id="sec-smi" class="section">
+        <div class="filters">
+          <select id="smi-variante" onchange="renderSMI()">
+            <option value="">Ambas versiones</option>
+            <option value="vos">Solo "vos"</option>
+            <option value="tu">Solo "tú"</option>
+          </select>
+          <input
+            type="text"
+            id="smi-search"
+            placeholder="Buscar..."
+            oninput="renderSMI()"
+            style="flex: 1; min-width: 150px"
+          />
+        </div>
+        <div id="smi-list"></div>
+      </div>
+    </div>
+
+    <script>
+      const PAISES = {
+        CR: "Costa Rica",
+        HN: "Honduras",
+        GT: "Guatemala",
+        NI: "Nicaragua",
+        SV: "El Salvador",
+        PA: "Panamá",
+      };
+      const STORAGE_KW = "miviaje_kw_v1";
+      const STORAGE_CP = "miviaje_cp_v1";
+
+      const DEFAULT_KW = [
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "tiquetes aéreos baratos desde Costa Rica",
+          i: "Compra de tiquetes económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "reservar vuelo internacional saliendo de San José",
+          i: "Reserva de vuelo internacional",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "comprar tiquete de avión en línea Costa Rica",
+          i: "Compra online",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "ofertas de vuelos desde Costa Rica al Caribe",
+          i: "Búsqueda de promociones",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "reservar tiquetes de avión con BAC Costa Rica",
+          i: "Reservar vuelos",
+          j: "H1",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "comprar tiquetes aéreos con tarjeta BAC",
+          i: "Compra vuelos",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "canjear puntos BAC por tiquetes de avión",
+          i: "Canje puntos → vuelos",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Vuelos",
+          k: "canjear millas por tiquetes internacionales",
+          i: "Canje millas",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Hoteles",
+          k: "reservar hotel en San José Costa Rica",
+          i: "Reserva urbana",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Hoteles",
+          k: "hoteles en playa Guanacaste reserva inmediata",
+          i: "Reserva de hotel de playa",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Hoteles",
+          k: "reservar hotel con tarjeta BAC Costa Rica",
+          i: "Reserva hoteles",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Hoteles",
+          k: "pagar hotel a cuotas sin intereses BAC",
+          i: "Financiamiento hotel",
+          j: "H3",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Autos",
+          k: "alquiler de autos en aeropuerto Juan Santamaría",
+          i: "Renta aeropuerto",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Autos",
+          k: "renta de carro en Costa Rica por día",
+          i: "Renta diaria",
+          j: "H3",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Autos",
+          k: "alquilar carro con tarjeta BAC Costa Rica",
+          i: "Autos",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Paquetes",
+          k: "paquetes de viaje dentro de Costa Rica",
+          i: "Paquetes nacionales",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Paquetes",
+          k: "comprar paquete vuelo y hotel Costa Rica",
+          i: "Paquete combinado",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Seguro",
+          k: "seguro de viaje internacional para costarricenses",
+          i: "Compra de seguro",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "CR",
+          p: "Financiamiento",
+          k: "viajes a cuotas con tarjeta BAC Costa Rica",
+          i: "Financiar viajes",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "CR",
+          p: "Financiamiento",
+          k: "pagar vacaciones a meses sin intereses Costa Rica",
+          i: "Pago fraccionado",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "HN",
+          p: "Vuelos",
+          k: "vuelos baratos desde Honduras",
+          i: "Compra de vuelos económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "HN",
+          p: "Vuelos",
+          k: "reservar vuelo internacional en línea Honduras",
+          i: "Reserva de vuelos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "HN",
+          p: "Vuelos",
+          k: "comprar pasaje aéreo con tarjeta de crédito BAC",
+          i: "Compra con tarjeta",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "HN",
+          p: "Hoteles",
+          k: "reservar hotel en Honduras online",
+          i: "Reserva de hotel",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "HN",
+          p: "Hoteles",
+          k: "hoteles en Roatán todo incluido reserva ahora",
+          i: "Resort all inclusive",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "HN",
+          p: "Paquetes",
+          k: "paquetes de viaje a Roatán desde Honduras",
+          i: "Paquete a destino",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "HN",
+          p: "Financiamiento",
+          k: "viajes a cuotas con tarjeta BAC Honduras",
+          i: "Financiar viaje",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "GT",
+          p: "Vuelos",
+          k: "vuelos baratos desde Guatemala",
+          i: "Compra de vuelos económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "GT",
+          p: "Vuelos",
+          k: "reservar vuelo a Miami desde Guatemala",
+          i: "Reserva internacional",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "GT",
+          p: "Hoteles",
+          k: "reservar hotel en Antigua Guatemala",
+          i: "Reserva turística",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "GT",
+          p: "Paquetes",
+          k: "paquetes de viaje desde Guatemala a Cancún",
+          i: "Paquetes internacionales",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "GT",
+          p: "Financiamiento",
+          k: "viajes a cuotas con tarjeta BAC Guatemala",
+          i: "Financiar viajes",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "NI",
+          p: "Vuelos",
+          k: "vuelos baratos desde Nicaragua",
+          i: "Compra de vuelos económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "NI",
+          p: "Hoteles",
+          k: "reservar hotel en Managua",
+          i: "Reserva urbana",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "NI",
+          p: "Hoteles",
+          k: "hoteles en San Juan del Sur reserva ahora",
+          i: "Reserva en playa",
+          j: "H2",
+          t: "info",
+        },
+        {
+          pais: "NI",
+          p: "Financiamiento",
+          k: "viajes a plazos con tarjeta BAC Nicaragua",
+          i: "Financiar viajes",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "SV",
+          p: "Vuelos",
+          k: "vuelos baratos desde El Salvador",
+          i: "Compra de vuelos económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "SV",
+          p: "Hoteles",
+          k: "reservar hotel en San Salvador",
+          i: "Reserva urbana",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "SV",
+          p: "Financiamiento",
+          k: "viajes en cuotas con tarjeta BAC El Salvador",
+          i: "Financiar viajes",
+          j: "H2",
+          t: "trans",
+        },
+        {
+          pais: "PA",
+          p: "Vuelos",
+          k: "vuelos baratos desde Panamá",
+          i: "Compra de vuelos económicos",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "PA",
+          p: "Vuelos",
+          k: "reservar vuelo a Estados Unidos desde Panamá",
+          i: "Reserva internacional",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "PA",
+          p: "Hoteles",
+          k: "reservar hotel en Ciudad de Panamá",
+          i: "Reserva urbana",
+          j: "H1",
+          t: "info",
+        },
+        {
+          pais: "PA",
+          p: "Financiamiento",
+          k: "viajes financiados con tarjeta BAC Panamá",
+          i: "Financiar viajes",
+          j: "H2",
+          t: "trans",
+        },
+      ];
+
+      const DEFAULT_CP = [
+        {
+          id: "HOME-H1-01",
+          pl: "Inicio",
+          el: "H1",
+          bl: "Hero",
+          tx: "Paquetes y ofertas de viaje con Mi Viaje BAC en {País}",
+          tu: "Paquetes y ofertas de viaje con Mi Viaje BAC en {País}",
+          vos: "Paquetes y ofertas de viaje con Mi Viaje BAC en {País}",
+          nt: "H1 principal (solo 1 por página).",
+        },
+        {
+          id: "HOME-H1-02",
+          pl: "Inicio",
+          el: "H1",
+          bl: "Hero",
+          tx: "Vuelos y hoteles con beneficios BAC en {País}",
+          tu: "Vuelos y hoteles con beneficios BAC en {País}",
+          vos: "Vuelos y hoteles con beneficios BAC en {País}",
+          nt: "Alternativa de H1 más directa.",
+        },
+        {
+          id: "HOME-H1-03",
+          pl: "Inicio",
+          el: "H1",
+          bl: "Hero",
+          tx: "Reserva tu próximo viaje con beneficios BAC en {País}",
+          tu: "Reserva tu próximo viaje con beneficios BAC en {País}",
+          vos: "Reservá tu próximo viaje con beneficios BAC en {País}",
+          nt: "H1 con foco en acción.",
+        },
+        {
+          id: "HOME-CTA-01",
+          pl: "Inicio",
+          el: "CTA",
+          bl: "Hero",
+          tx: "Buscar y reservar",
+          tu: "Buscar y reservar",
+          vos: "Buscar y reservar",
+          nt: "CTA principal recomendado.",
+        },
+        {
+          id: "HOME-CTA-02",
+          pl: "Inicio",
+          el: "CTA",
+          bl: "Hero",
+          tx: "Buscar ahora",
+          tu: "Buscar ahora",
+          vos: "Buscar ahora",
+          nt: "Alternativa más corta.",
+        },
+        {
+          id: "HOME-CTA-03",
+          pl: "Inicio",
+          el: "CTA",
+          bl: "Hero",
+          tx: "Explorar opciones",
+          tu: "Explorar opciones",
+          vos: "Explorar opciones",
+          nt: 'Alternativa si "reservar" es muy fuerte para home.',
+        },
+        {
+          id: "HOME-SUP-01",
+          pl: "Inicio",
+          el: "Texto apoyo",
+          bl: "Hero",
+          tx: "Vuelos, hoteles y experiencias con beneficios BAC.",
+          tu: "Encuentra vuelos, hoteles y experiencias en un solo lugar y aprovecha beneficios BAC como Tasa Cero y opciones de pago flexibles.",
+          vos: "Encontrá vuelos, hoteles y experiencias en un solo lugar y aprovechá beneficios BAC como Tasa Cero y opciones de pago flexibles.",
+          nt: "1–2 líneas máximo.",
+        },
+        {
+          id: "HOME-H2-01",
+          pl: "Inicio",
+          el: "H2",
+          bl: "Buscador",
+          tx: "Busca y reserva tu próximo viaje",
+          tu: "Busca y reserva tu próximo viaje (buscador)",
+          vos: "Buscá y reserva tu próximo viaje (buscador)",
+          nt: "Título H2 del buscador.",
+        },
+        {
+          id: "HOME-H2-02",
+          pl: "Inicio",
+          el: "H2",
+          bl: "Estático",
+          tx: "Promociones vigentes para tu viaje",
+          tu: "Promociones vigentes para tu viaje",
+          vos: "Promociones vigentes para tu viaje",
+          nt: "Título H2 del Home.",
+        },
+        {
+          id: "HOME-H2-03",
+          pl: "Inicio",
+          el: "H2",
+          bl: "Vuelos",
+          tx: "Vuelos a destinos que te inspiran",
+          tu: "Vuelos a destinos que te inspiran",
+          vos: "Vuelos a destinos que te inspiran",
+          nt: "Título H2 del Home.",
+        },
+        {
+          id: "HOME-H2-04",
+          pl: "Inicio",
+          el: "H2",
+          bl: "Estático",
+          tx: "Paga tu viaje con beneficios BAC",
+          tu: "Paga tu viaje con beneficios BAC",
+          vos: "Pagá tu viaje con beneficios BAC",
+          nt: "Título H2 del Home.",
+        },
+        {
+          id: "HOME-H2-05",
+          pl: "Inicio",
+          el: "H2",
+          bl: "Hoteles",
+          tx: "Hoteles al mejor precio",
+          tu: "Hoteles al mejor precio",
+          vos: "Hoteles al mejor precio",
+          nt: "Título H2 del Home.",
+        },
+        {
+          id: "HOME-MICRO-CR-V",
+          pl: "Inicio",
+          el: "Microcopy",
+          bl: "Vuelos",
+          tx: "tiquetes aéreos baratos desde Costa Rica.",
+          tu: "Encuentra tiquetes y vuelos: tiquetes aéreos baratos desde Costa Rica.",
+          vos: "Encontrá tiquetes y vuelos: tiquetes aéreos baratos desde Costa Rica.",
+          nt: "Microcopy SEO Costa Rica – vuelos.",
+        },
+        {
+          id: "HOME-MICRO-GT-V",
+          pl: "Inicio",
+          el: "Microcopy",
+          bl: "Vuelos",
+          tx: "vuelos baratos desde Guatemala.",
+          tu: "Encuentra pasajes y vuelos: vuelos baratos desde Guatemala.",
+          vos: "Encontrá pasajes y vuelos: vuelos baratos desde Guatemala.",
+          nt: "Microcopy SEO Guatemala – vuelos.",
+        },
+        {
+          id: "PROMO-H1-01",
+          pl: "Promociones",
+          el: "H1",
+          bl: "Hero",
+          tx: "Promociones vigentes de Mi Viaje BAC en {País}",
+          tu: "Promociones vigentes de Mi Viaje BAC en {País}",
+          vos: "Promociones vigentes de Mi Viaje BAC en {País}",
+          nt: "H1 principal de promociones.",
+        },
+        {
+          id: "PROMO-CTA-01",
+          pl: "Promociones",
+          el: "CTA",
+          bl: "Hero",
+          tx: "Ver promociones",
+          tu: "Ver promociones",
+          vos: "Ver promociones",
+          nt: "CTA principal de promociones.",
+        },
+        {
+          id: "TUT-H1-01",
+          pl: "Tutoriales",
+          el: "H1",
+          bl: "Hero",
+          tx: "Tutoriales Mi Viaje BAC: aprende a reservar paso a paso",
+          tu: "Tutoriales Mi Viaje BAC: aprende a reservar paso a paso",
+          vos: "Tutoriales Mi Viaje BAC: aprendé a reservar paso a paso",
+          nt: "H1 para tutoriales.",
+        },
+        {
+          id: "SMV-H1-01",
+          pl: "Sobre Mi Viaje",
+          el: "H1",
+          bl: "Hero",
+          tx: "¿Qué es Mi Viaje BAC? Plataforma de viajes en {País}",
+          tu: "¿Qué es Mi Viaje BAC? Plataforma de viajes en {País}",
+          vos: "¿Qué es Mi Viaje BAC? Plataforma de viajes en {País}",
+          nt: "H1 de la página Sobre Mi Viaje.",
+        },
+        {
+          id: "EXP-H1-01",
+          pl: "Experiencias Exclusivas",
+          el: "H1",
+          bl: "Hero",
+          tx: "Experiencias exclusivas para completar tu viaje en {País}",
+          tu: "Experiencias exclusivas para completar tu viaje en {País}",
+          vos: "Experiencias exclusivas para completar tu viaje en {País}",
+          nt: "H1 para Experiencias.",
+        },
+      ];
+
+      const SMI_DATA = [
+        {
+          op: 1,
+          h1v: "Mi Viaje BAC: reservá vuelos y hoteles con beneficios",
+          p1v: "En Mi Viaje podés reservar vuelos y reservar hotel en un solo lugar, pensado para clientes BAC.",
+          p2v: "Construí recuerdos con tranquilidad: con nuestras facilidades de pago, podés pagar con tarjeta BAC, a cuotas o con beneficios disponibles.",
+          h1t: "Mi Viaje BAC: reserva vuelos y hoteles con beneficios",
+          p1t: "En Mi Viaje puedes reservar vuelos y reservar hotel en un solo lugar, pensado para clientes BAC.",
+          p2t: "Construye recuerdos con tranquilidad: con nuestras facilidades de pago, puedes pagar con tarjeta BAC, a cuotas o con beneficios disponibles.",
+          kw: "reservar vuelos, reservar hotel, cuotas BAC",
+        },
+        {
+          op: 2,
+          h1v: "Reservá tu viaje con BAC: vuelos, hoteles, autos y tours",
+          p1v: "Encontrá vuelos, hoteles y alquiler de autos para armar tu plan completo desde un solo sitio.",
+          p2v: "Viajá más fácil: podés combinar tarjeta BAC, cuotas y recompensas, para que cada experiencia sea más accesible.",
+          h1t: "Reserva tu viaje con BAC: vuelos, hoteles, autos y tours",
+          p1t: "Encuentra vuelos, hoteles y alquiler de autos para armar tu plan completo desde un solo sitio.",
+          p2t: "Viaja más fácil: puedes combinar tarjeta BAC, cuotas y recompensas, para que cada experiencia sea más accesible.",
+          kw: "alquiler de autos, tours, BAC, pagar a cuotas",
+        },
+        {
+          op: 3,
+          h1v: "Comprá tiquetes en línea con BAC y viajá a tu ritmo",
+          p1v: "Compará opciones y comprá tiquetes de avión en línea de forma rápida y segura.",
+          p2v: "Disfrutá más por menos: podés financiar tiquetes o pagar a cuotas con tarjeta BAC.",
+          h1t: "Compra tiquetes en línea con BAC y viaja a tu ritmo",
+          p1t: "Compara opciones y compra tiquetes de avión en línea de forma rápida y segura.",
+          p2t: "Disfruta más por menos: puedes financiar tiquetes o pagar a cuotas con tarjeta BAC.",
+          kw: "comprar tiquetes en línea, financiar tiquetes, cuotas BAC",
+        },
+        {
+          op: 4,
+          h1v: "Vuelos internacionales con BAC: reservá fácil y seguro",
+          p1v: "Organizá tu salida al exterior con una experiencia simple para reservar vuelo internacional.",
+          p2v: "Viajá con respaldo: sumá seguro de viaje internacional y pagá con BAC en cuotas o con beneficios.",
+          h1t: "Vuelos internacionales con BAC: reserva fácil y seguro",
+          p1t: "Organiza tu salida al exterior con una experiencia simple para reservar vuelo internacional.",
+          p2t: "Viaja con respaldo: suma seguro de viaje internacional y paga con BAC en cuotas o con beneficios.",
+          kw: "reservar vuelo internacional, seguro de viaje, BAC",
+        },
+        {
+          op: 5,
+          h1v: "Reservá vuelo + hotel con BAC en una sola compra",
+          p1v: "Armá tu plan con paquete vuelo y hotel para simplificar tu reserva y ver el costo total.",
+          p2v: "Planificá sin estrés: pagá tu vuelo + hotel con tarjeta BAC, a cuotas o con recompensas cuando aplique.",
+          h1t: "Reserva vuelo + hotel con BAC en una sola compra",
+          p1t: "Arma tu plan con paquete vuelo y hotel para simplificar tu reserva y ver el costo total.",
+          p2t: "Planifica sin estrés: paga tu vuelo + hotel con tarjeta BAC, a cuotas o con recompensas cuando aplique.",
+          kw: "vuelo + hotel, paquete dinámico, pagar a cuotas BAC",
+        },
+      ];
+
+      const STRUCT_DATA = [
+        {
+          name: "Inicio (Home)",
+          obj: "Explicar qué es Mi Viaje BAC y llevar al usuario a buscar/reservar.",
+          h1: [
+            "Ofertas de viaje con Mi Viaje BAC en {País}",
+            "Vuelos y hoteles con beneficios BAC en {País}",
+            "Reserva tu próximo viaje con beneficios BAC en {País}",
+          ],
+          cta: "Buscar y reservar",
+          apoyo:
+            "Encuentra vuelos, hoteles y experiencias en un solo lugar y aprovecha beneficios BAC como Tasa Cero y opciones de pago flexibles.",
+          h2: [
+            "Busca y reserva tu próximo viaje",
+            "Promociones vigentes para tu viaje",
+            "Vuelos a destinos que te inspiran",
+            "Paga tu viaje con beneficios BAC",
+            "Hoteles al mejor precio",
+          ],
+          h3: ["Tasa Cero", "Canjea tus puntos/millas", "Formas de pago"],
+        },
+        {
+          name: "Sobre Mi Viaje",
+          obj: "Explicar qué es Mi Viaje, qué incluye y por qué conviene para clientes BAC.",
+          h1: [
+            "¿Qué es Mi Viaje BAC? Plataforma de viajes en {País}",
+            "Mi Viaje BAC: planea, reserva y paga con beneficios en {País}",
+            "Bienvenido a Mi Viaje BAC: tu espacio de viajes",
+          ],
+          cta: null,
+          apoyo:
+            "Reserva vuelos, hoteles y más con beneficios exclusivos BAC. Te ayudamos a planear y pagar tu viaje de forma fácil y segura.",
+          h2: [
+            "Qué puedes reservar en Mi Viaje",
+            "Beneficios BAC para pagar tu viaje",
+            "Cómo funciona en 3 pasos",
+            "Preguntas frecuentes",
+            "Empieza a planear tu viaje hoy",
+          ],
+          h3: ["Paso 1: Busca", "Paso 2: Elige", "Paso 3: Paga"],
+        },
+        {
+          name: "Promociones",
+          obj: "Dejar claro qué promos hay, cómo aprovecharlas y dónde están los términos.",
+          h1: [
+            "Promociones vigentes de Mi Viaje BAC en {País}",
+            "Aprovecha promociones para tu próximo viaje con beneficios BAC",
+            "Promociones y beneficios BAC para viajar mejor en {País}",
+          ],
+          cta: "Ver promociones",
+          apoyo:
+            "Explora promociones activas y elige cómo pagar tu viaje con beneficios BAC.",
+          h2: [
+            "Beneficios y formas de pago",
+            "Promociones disponibles",
+            "Cómo aplicar una promoción",
+            "Canjes y beneficios BAC",
+            "Ayuda y términos",
+          ],
+          h3: [],
+        },
+        {
+          name: "Tutoriales",
+          obj: "Enseñar a usar Mi Viaje y llevar al usuario a la acción.",
+          h1: [
+            "Tutoriales Mi Viaje BAC: aprende a reservar paso a paso",
+            "Guías rápidas: cómo reservar y pagar tu viaje con BAC",
+            "Aprende a usar Mi Viaje BAC en {País}",
+          ],
+          cta: "Buscar viajes",
+          apoyo:
+            "Te mostramos cómo reservar vuelos, hoteles y autos, y cómo pagar combinando beneficios BAC en una sola compra.",
+          h2: [
+            "Reservar un vuelo",
+            "Reservar un hotel",
+            "Rentar un auto",
+            "Comprar boleto para Disney",
+            "Combinar formas de pago y aplicar promociones",
+          ],
+          h3: [
+            "Consejos rápidos",
+            "Errores comunes",
+            "Recomendaciones de pago",
+          ],
+        },
+        {
+          name: "Experiencias Exclusivas",
+          obj: "Mostrar experiencias y llevar a explorar/reservar con beneficios BAC.",
+          h1: [
+            "Experiencias exclusivas para completar tu viaje en {País}",
+            "Vive experiencias únicas y paga con beneficios BAC en {País}",
+            "Experiencias y actividades para tu próximo viaje con Mi Viaje BAC",
+          ],
+          cta: null,
+          apoyo:
+            "Explora experiencias y actividades para tu viaje y reserva de forma simple con beneficios BAC.",
+          h2: [
+            "Elige una experiencia",
+            "Beneficios BAC para pagar tu experiencia",
+            "Recomendados",
+            "Preguntas frecuentes",
+            "Empieza a planear tu viaje",
+          ],
+          h3: ["Aventura", "Cultura", "Familia"],
+        },
+      ];
+
+      let kwData = [],
+        copyData = [],
+        saveTimer = null;
+
+      function loadData() {
+        setSaveStatus("Cargando...", "");
+        try {
+          const r = localStorage.getItem(STORAGE_KW);
+          kwData = r ? JSON.parse(r) : [...DEFAULT_KW];
+        } catch (e) {
+          kwData = [...DEFAULT_KW];
+        }
+        try {
+          const r = localStorage.getItem(STORAGE_CP);
+          copyData = r ? JSON.parse(r) : [...DEFAULT_CP];
+        } catch (e) {
+          copyData = [...DEFAULT_CP];
+        }
+        setSaveStatus("Guardado", "saved");
+        renderKW();
+        renderCopys();
+        renderStruct();
+        renderSMI();
+      }
+
+      function setSaveStatus(txt, cls) {
+        const el = document.getElementById("save-status");
+        el.textContent = txt;
+        el.className = "save-status" + (cls ? " " + cls : "");
+      }
+
+      function saveData() {
+        setSaveStatus("Guardando...", "saving");
+        try {
+          localStorage.setItem(STORAGE_KW, JSON.stringify(kwData));
+          localStorage.setItem(STORAGE_CP, JSON.stringify(copyData));
+          setSaveStatus("Guardado", "saved");
+        } catch (e) {
+          setSaveStatus("Error al guardar", "");
+        }
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(saveData, 800);
+      }
+
+      function showTab(t, btn) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((e) => e.classList.remove("active"));
+        document
+          .querySelectorAll(".section")
+          .forEach((e) => e.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById("sec-" + t).classList.add("active");
+      }
+
+      function badgeH(j) {
+        if (!j) return "";
+        return `<span class="badge ${j.toLowerCase()}">${j}</span>`;
+      }
+
+      function renderKW() {
+        const pais = document.getElementById("kw-pais").value;
+        const prod = document.getElementById("kw-producto").value;
+        const jer = document.getElementById("kw-jerarquia").value;
+        const tipo = document.getElementById("kw-tipo").value;
+        const q = document.getElementById("kw-search").value.toLowerCase();
+        const data = kwData.filter((r) => {
+          if (pais && r.pais !== pais) return false;
+          if (prod && r.p !== prod) return false;
+          if (jer && r.j !== jer) return false;
+          if (tipo && r.t !== tipo) return false;
+          if (
+            q &&
+            !r.k.toLowerCase().includes(q) &&
+            !r.i.toLowerCase().includes(q)
+          )
+            return false;
+          return true;
+        });
+        document.getElementById("kw-count").textContent = kwData.length;
+        const stats = {};
+        kwData.forEach((r) => {
+          stats[r.pais] = (stats[r.pais] || 0) + 1;
+        });
+        document.getElementById("kw-stats").innerHTML = Object.entries(PAISES)
+          .map(
+            ([c, n]) =>
+              `<div class="stat-card"><div class="sv">${stats[c] || 0}</div><div class="sk">${n}</div></div>`,
+          )
+          .join("");
+        const tbody = document.getElementById("kw-tbody");
+        if (!data.length) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data
+          .map((r) => {
+            const idx = kwData.indexOf(r);
+            return `<tr>
+      <td><span class="pill">${PAISES[r.pais] || r.pais}</span></td>
+      <td style="font-size:13px;">${r.k}</td>
+      <td style="color:#6b6b67;font-size:12px;">${r.i}</td>
+      <td><span class="pill">${r.t === "trans" ? "Transaccional" : "Informacional"}</span></td>
+      <td><span class="tag">${r.p}</span></td>
+      <td>${badgeH(r.j)}</td>
+      <td class="col-del"><button class="btn-del" onclick="delKW(${idx})">×</button></td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      function delKW(idx) {
+        kwData.splice(idx, 1);
+        scheduleSave();
+        renderKW();
+      }
+
+      function addKW() {
+        const pais = document.getElementById("new-kw-pais").value;
+        const p = document.getElementById("new-kw-prod").value;
+        const k = document.getElementById("new-kw-text").value.trim();
+        const i = document.getElementById("new-kw-int").value.trim();
+        const t = document.getElementById("new-kw-tipo").value;
+        const j = document.getElementById("new-kw-jer").value;
+        if (!k) return;
+        kwData.push({ pais, p, k, i, t, j });
+        document.getElementById("new-kw-text").value = "";
+        document.getElementById("new-kw-int").value = "";
+        scheduleSave();
+        renderKW();
+      }
+
+      function renderCopys() {
+        const pl = document.getElementById("cp-plantilla").value;
+        const el = document.getElementById("cp-elemento").value;
+        const q = document.getElementById("cp-search").value.toLowerCase();
+        const data = copyData.filter((r) => {
+          if (pl && r.pl !== pl) return false;
+          if (el && r.el !== el) return false;
+          if (
+            q &&
+            !r.tx.toLowerCase().includes(q) &&
+            !r.id.toLowerCase().includes(q) &&
+            !(r.tu || "").toLowerCase().includes(q)
+          )
+            return false;
+          return true;
+        });
+        document.getElementById("copy-count").textContent = copyData.length;
+        const grid = document.getElementById("copy-grid");
+        if (!data.length) {
+          grid.innerHTML = '<p class="empty">Sin resultados</p>';
+          return;
+        }
+        grid.innerHTML = data
+          .map((r) => {
+            const idx = copyData.indexOf(r);
+            const elCls = r.el.startsWith("H") ? r.el.toLowerCase() : "cta";
+            return `<div class="copy-card">
+      <button class="btn-del del-card" onclick="delCopy(${idx})">×</button>
+      <div class="copy-id">${r.id}</div>
+      <div class="copy-meta"><span class="pill">${r.pl}</span><span class="badge ${elCls}">${r.el}</span><span style="font-size:11px;color:#9b9b96;">${r.bl || ""}</span></div>
+      <div class="copy-label">Texto base</div>
+      <div class="copy-text">${r.tx}</div>
+      ${r.vos && r.vos !== r.tu ? `<div class="copy-label">Versión "vos"</div><div class="copy-vos">${r.vos}</div>` : ""}
+      ${r.nt ? `<div class="copy-notes">${r.nt}</div>` : ""}
+    </div>`;
+          })
+          .join("");
+      }
+
+      function delCopy(idx) {
+        copyData.splice(idx, 1);
+        scheduleSave();
+        renderCopys();
+      }
+
+      function addCopy() {
+        const id = document.getElementById("new-cp-id").value.trim();
+        const pl = document.getElementById("new-cp-plantilla").value;
+        const el = document.getElementById("new-cp-elemento").value;
+        const bl = document.getElementById("new-cp-bloque").value.trim();
+        const tx = document.getElementById("new-cp-texto").value.trim();
+        const tu = document.getElementById("new-cp-tu").value.trim();
+        const vos = document.getElementById("new-cp-vos").value.trim();
+        const nt = document.getElementById("new-cp-notas").value.trim();
+        if (!tx) return;
+        copyData.push({
+          id: id || "COPY-" + Date.now(),
+          pl,
+          el,
+          bl,
+          tx,
+          tu: tu || tx,
+          vos: vos || tx,
+          nt,
+        });
+        [
+          "new-cp-id",
+          "new-cp-bloque",
+          "new-cp-texto",
+          "new-cp-tu",
+          "new-cp-vos",
+          "new-cp-notas",
+        ].forEach((f) => (document.getElementById(f).value = ""));
+        scheduleSave();
+        renderCopys();
+      }
+
+      function renderStruct() {
+        document.getElementById("struct-cards").innerHTML = STRUCT_DATA.map(
+          (s) => `
+    <div class="smi-card" style="margin-bottom:12px;">
+      <h4 style="font-size:15px;font-weight:500;margin-bottom:4px;">${s.name}</h4>
+      <p style="font-size:12px;color:#6b6b67;margin-bottom:12px;">${s.obj}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:11px;color:#9b9b96;margin-bottom:6px;">Opciones de H1</div>
+          ${s.h1.map((h) => `<div style="font-size:12px;padding:5px 8px;background:#f5f5f1;border-radius:6px;margin-bottom:4px;">${h}</div>`).join("")}
+          ${s.cta ? `<div style="margin-top:10px;"><div style="font-size:11px;color:#9b9b96;margin-bottom:4px;">CTA principal</div><span class="badge cta">${s.cta}</span></div>` : ""}
+        </div>
+        <div>
+          <div style="font-size:11px;color:#9b9b96;margin-bottom:6px;">Bloques H2</div>
+          ${s.h2.map((h) => `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span class="badge h2" style="font-size:10px;flex-shrink:0">H2</span><span style="font-size:12px;">${h}</span></div>`).join("")}
+          ${s.h3.length ? `<div style="margin-top:8px;"><div style="font-size:11px;color:#9b9b96;margin-bottom:4px;">H3 opcionales</div>${s.h3.map((h) => `<span class="tag">${h}</span>`).join("")}</div>` : ""}
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;padding:8px 10px;background:#f5f5f1;border-radius:6px;color:#6b6b67;">${s.apoyo}</div>
+    </div>`,
+        ).join("");
+      }
+
+      function renderSMI() {
+        const variante = document.getElementById("smi-variante").value;
+        const q = document.getElementById("smi-search").value.toLowerCase();
+        const data = SMI_DATA.filter(
+          (r) => !q || (r.h1v + r.h1t + r.p1v + r.kw).toLowerCase().includes(q),
+        );
+        document.getElementById("smi-list").innerHTML = data
+          .map((r) => {
+            const sv = !variante || variante === "vos";
+            const st = !variante || variante === "tu";
+            return `<div class="smi-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;font-family:monospace;background:#f5f5f1;padding:2px 8px;border-radius:6px;">Opción ${r.op}</span>
+        ${r.kw
+          .split(",")
+          .map((k) => `<span class="tag">${k.trim()}</span>`)
+          .join("")}
+      </div>
+      ${
+        sv
+          ? `<div style="margin-bottom:${st ? "12px" : "0"};">
+        <div style="font-size:11px;color:#9b9b96;margin-bottom:4px;">Versión "vos"</div>
+        <p style="font-size:14px;font-weight:500;margin-bottom:6px;">${r.h1v}</p>
+        <p style="font-size:13px;line-height:1.5;margin-bottom:4px;">${r.p1v}</p>
+        <p style="font-size:13px;line-height:1.5;color:#6b6b67;">${r.p2v}</p>
+      </div>`
+          : ""
+      }
+      ${sv && st ? `<hr style="border:none;border-top:0.5px solid #e8e8e4;margin:12px 0;">` : ""}
+      ${
+        st
+          ? `<div>
+        <div style="font-size:11px;color:#9b9b96;margin-bottom:4px;">Versión "tú"</div>
+        <p style="font-size:14px;font-weight:500;margin-bottom:6px;">${r.h1t}</p>
+        <p style="font-size:13px;line-height:1.5;margin-bottom:4px;">${r.p1t}</p>
+        <p style="font-size:13px;line-height:1.5;color:#6b6b67;">${r.p2t}</p>
+      </div>`
+          : ""
+      }
+    </div>`;
+          })
+          .join("");
+      }
+
+      loadData();
+    </script>
+  </body>
+</html>
